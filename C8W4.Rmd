@@ -15,7 +15,7 @@ library(randomForest)
 library(caret)
 
 ```
-
+# Reading and preprocessing the data
 When reading the data, I exlude the "#DIV/0!" values that make some columns with numbers being treated as factors.
 
 ```{r warning = FALSE, message = FALSE}
@@ -36,6 +36,7 @@ for(i in c(8:ncol(data) - 1))
 }
 ```
 
+# Choosing predictors
 Now I prepare the potential predictors list: exclude all obviously non-relevant variables (like username) which are in columns 1:7 and all the columns that contain ANY NAs
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
@@ -51,6 +52,7 @@ training_data <- my_predictors[split_data,]
 validate_data <- my_predictors[-split_data,]
 ```
 
+# Fitting the model
 I now fit the model using all the predictors and default ntree value (500). After the model is fit, I check the prediction result with confusionMatrix
 
 ```{r}
@@ -65,5 +67,6 @@ The model shows good results on training dataset (99.97% accuracy). Now I test t
 pred_val <- predict(model, newdata = validate_data)
 confusionMatrix(pred_val, validate_data$classe)
 ```
-
-Accuracy declined to 99.43% but it's still very good. I should note that it's impossible to test the model on testing dataset since it doesn't have "classe" column.
+# Cross validation
+Accuracy declined to 99.43% but it's still very good. 
+I should note that it's impossible to test the model on testing dataset since it doesn't have "classe" column.
