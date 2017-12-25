@@ -1,0 +1,69 @@
+---
+html_document:
+  keep_md: yes
+author: "Mikhail Chepkiy"
+date: "December 23, 2017"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+title: "Machine Learning Course Project"
+---
+
+```{r warning = FALSE, message = FALSE}
+library(randomForest)
+library(caret)
+
+```
+
+When reading the data, I exlude the "#DIV/0!" values that make some columns with numbers being treated as factors.
+
+```{r warning = FALSE, message = FALSE}
+set.seed(2017)
+url_train <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+url_test <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+data <- read.csv(url_train, na.strings = c("#DIV/0!"))
+data_test <- read.csv(url_test, na.strings = c("#DIV/0!"))
+```
+
+I will now explicitly convert all the columns after 8 and except the last one ("classe") to numeric
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+for(i in c(8:ncol(data) - 1))
+{
+  data[, i] = as.numeric(as.character(data[, i]))
+}
+```
+
+Now I prepare the potential predictors list: exclude all obviously non-relevant variables (like username) which are in columns 1:7 and all the columns that contain ANY NAs
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+is_predictor <- colnames(data[colSums(is.na(data)) == 0])[8:ncol(data)]
+my_predictors <- data[is_predictor[!is.na(is_predictor)]]
+```
+
+I split the training dataset into training and validation in 60/40 proportion
+
+```{r}
+split_data <- createDataPartition(y = my_predictors$classe, p = 0.6, list = FALSE )
+training_data <- my_predictors[split_data,]
+validate_data <- my_predictors[-split_data,]
+```
+
+I now fit the model using all the predictors and default ntree value (500). After the model is fit, I check the prediction result with confusionMatrix
+
+```{r}
+model <- randomForest(training_data[1:(ncol(training_data)-1)], training_data$classe)
+pred <- predict(model, newdata = training_data)
+confusionMatrix(pred, training_data$classe)
+```
+
+The model shows good results on training dataset (99.97% accuracy). Now I test the model on validation dataset.
+
+```{r}
+pred_val <- predict(model, newdata = validate_data)
+confusionMatrix(pred_val, validate_data$classe)
+```
+
+Accuracy declined to 99.43% but it's still very good. I should note that it's impossible to test the model on testing dataset since it doesn't have "classe" column.
