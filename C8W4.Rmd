@@ -62,11 +62,13 @@ confusionMatrix(pred, training_data$classe)
 ```
 
 The model shows good results on training dataset (99.97% accuracy). Now I test the model on validation dataset.
+# Cross validation
+Accuracy declined to 99.43% but it's still very good. 
 
 ```{r}
 pred_val <- predict(model, newdata = validate_data)
 confusionMatrix(pred_val, validate_data$classe)
 ```
-# Cross validation
-Accuracy declined to 99.43% but it's still very good. 
-I should note that it's impossible to test the model on testing dataset since it doesn't have "classe" column.
+
+Tested on the quiz, model yields 100% hit rate.
+
